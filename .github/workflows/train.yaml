@@ -20,10 +20,7 @@ jobs:
     - name: Install DVC
       run: |
         pip install dvc
-    - name: Configure DVC
-      run: |
-        dvc remote add -d mon_remote gdrive://1qu-1KTktbwdnA3kKJPQ5Cx3iSEot6vPx
-
+    
     - name: DVC Push
       run: |
           pip install -r requirements.txt
