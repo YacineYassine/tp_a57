@@ -20,6 +20,7 @@ jobs:
     - name: Install DVC
       run: |
         pip install dvc
+        pip install dvc[gdrive]
     
     - name: DVC Push
       run: |
