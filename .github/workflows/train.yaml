@@ -1,58 +1,49 @@
-name: model-supervisé RL
-on: [push]
+name: model-training
+on: [push] # Trigger - push event
 jobs:
-  dvc-push:
-    runs-on: ubuntu-latest
-
+  run:
+    runs-on: [ubuntu-latest]
+    #container: docker://dvcorg/cml:0-dvc2-base1
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
-
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.x
-
-    - name: Install DVC
-      run: |
-        pip install dvc
-
-    - name: Configure DVC
-      run: | 
-        dvc remote add -d mon_remote gdrive://1qu-1KTktbwdnA3kKJPQ5Cx3iSEot6vPx
-
-    - name: DVC Push
-      run: |
-        pip install -r requirements.txt
-        dvc repro
-        dvc push
-
-        git fetch --prune
-        dvc metrics diff --show-md master > report.md
-        cml-send-comment report.md  
+      - uses: actions/checkout@v2
+      - name: Model Diff
+        uses: iterative/setup-cml@v1
+    env:
+        REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GDRIVE_CREDENTIALS_DATA: ${{ secrets.MY_SECRET }}
+        run: |
+          pip install -r requirements.txt
+          pip install dvc[gdrive]
+          dvc remote modify filterout --local gdrive_service_account_json_file_path /dev/null
+          dvc pull -r filterout --verbose
+          dvc repro
           
-          # Add figure to the report
-          #echo "## Validating results by region"
-          #cml-publish metrics.json --md >> report.md
-          #echo "## Metriques:" >> report.md
-          #cat metrics.json >> report.md
+          git fetch --prune
+          dvc metrics diff --show-md master > report.md
+              
+              # Add figure to the report
+              #echo "## Validating results by region"
+              #cml-publish metrics.json --md >> report.md
+              #echo "## Metriques:" >> report.md
+              #cat metrics.json >> report.md
+              
+              #cml-send-cooment ROC.png --md >> report.md 
+          cml-send-comment report.md  
+    
+    
+  
+  
           
-          #cml-send-cooment ROC.png --md >> report.md 
-
-
-
-
-        
-          #git config --global user.email "abbaoui.yacine2016@gmail.com"
-          #git config --global user.name "YacineYassine"
-        
+            #git config --global user.email "abbaoui.yacine2016@gmail.com"
+            #git config --global user.name "YacineYassine"
           
-          # Add a figure into report
-          #echo "## ROC Graph for the model"
-          ##cml-publish ROC.png --md >> report.md 
-          #cml-send-cooment ROC.png --md >> report.md 
-          
-          #cml-send-comment report.md
+            
+            # Add a figure into report
+            #echo "## ROC Graph for the model"
+            ##cml-publish ROC.png --md >> report.md 
+            #cml-send-cooment ROC.png --md >> report.md 
+            
+            #cml-send-comment report.md
 
 
 
